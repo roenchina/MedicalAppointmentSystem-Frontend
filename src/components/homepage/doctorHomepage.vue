@@ -9,7 +9,8 @@
 
       <el-main>
       <el-col>
-        <el-row :span="3">
+      <!--ifTest = true的情况下，显示detailForm数据-->
+        <el-row :span="3" v-if="this.ifTest == true">
           <h3 style="text-align: left;"> 个人信息 </h3>
           <el-col :span="6">
             <div>
@@ -51,6 +52,68 @@
           </el-col>
         </el-row>
 
+      <!--ifTest = false的情况下，显示dbForm数据-->
+        <el-row :span="10" v-if="this.ifTest == false">
+          <h3 style="text-align: left;"> 个人信息 </h3>
+          <el-col :span="6">
+            <div>
+              <el-avatar shape="square" :size="130" :fit="fit" :src="picUrl"></el-avatar>
+            </div>
+            <el-rate
+              v-model="detailForm.score"
+              disabled
+              show-score
+              text-color="#ff9900"
+              score-template="{value}">
+            </el-rate>
+          </el-col>
+
+          <el-col :span="17" style="text-align: left;">
+            <el-row :span="1">
+              <div>
+                <h4 style="display: inline; font-size: 18px;">{{dbFrom.name}}</h4>
+                <span> {{dbFrom.title}} </span>
+              </div>
+            </el-row>
+
+            <el-row :span="1">
+              <el-link type="primary" @click="gotoHospital(dbFrom.hospital)">所属医院：{{dbFrom.hospital}}</el-link>
+              <span> - </span>
+              <el-link type="primary" @click="gotoDepartment(dbFrom.department)">所属科室：{{dbFrom.department}}</el-link>
+            </el-row>
+
+            <el-row :span="1">
+              <span style="font-size: 14px;"> 擅长： </span>
+              <span> {{dbFrom.medicine}} </span>
+            </el-row>
+
+            <el-row :span="1">
+              <span style="font-size: 14px;"> 简介： </span>
+              <span> {{dbFrom.introduction}} </span>
+            </el-row>
+
+            <el-row :span="1">
+              <span style="font-size: 14px;"> 挂号数量： </span>
+              <span> {{dbFrom.registerSum}} </span>
+            </el-row>
+
+            <el-row :span="1">
+              <span style="font-size: 14px;"> 开展项目： </span>
+              <span> {{dbFrom.project}} </span>
+            </el-row>
+
+            <el-row :span="1">
+              <span style="font-size: 14px;"> 联系电话： </span>
+              <span> {{dbFrom.tel}} </span>
+            </el-row>
+
+            <el-row :span="1">
+              <span style="font-size: 14px;"> 联系邮箱： </span>
+              <span> {{dbFrom.email}} </span>
+            </el-row>
+
+          </el-col>
+        </el-row>
         <el-divider></el-divider>
 
         <el-row :span="7">
@@ -89,33 +152,35 @@ const axios = require('axios');
 export default {
   data() {
     return {
+      ifTest: false,
       hospitalUrl: "",
       departmentUrl: "",
       picUrl: "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
-      // 这里是数据信息
-      // 需要
-      // 1. doctorName：医生的姓名 (从上一个跳转入口进入，跳转入口将会提供医生的姓名)
-      // 2. detailForm：通过数据库接口获取的，该医生的详细信息，包括：
-      //  2.1 doctorName
-      //  2.2 title 职称
-      //  2.3 dept 所属科室
-      //  2.4 hospital 所属医院
-      //  2.5 medicine 擅长科目
-      //  2.6 introduction 个人简介
-      //  2.7 project 开展项目
-      //  2.8 registID 挂号信息ID
-      //  2.9 registerSum
-      //  2.10 score 医生评分
-      //  2.11 evalue 患者评价
-      // 3. evalue：患者的评价信息
       doctorName: "冯磊",   // 从上一个跳转界面获得的医生姓名
 
       // 数据库数据
       dbFrom: {
+        name: "汤正义",
+        title: "主任医生",
+        hospital: "002",
         department: "002",
-        email: "tangzy@163.com"
-        graph: "",
-      }
+        medicine: "糖尿病/甲状腺疾病",
+        introduction: "重点在糖尿病神经病变、糖尿病足病",
+
+        score: 100,
+
+        registerSum: 1,
+        registerTime: "2021-06-05",
+        project: "预约挂号/在线问诊/答疑",
+        tel: "18883458245",
+        email: "tangzy@163.com",
+        vx: null,
+
+        evaluate: "非常负责",
+        graph: "https://bkimg.cdn.bcebos.com/pic/8644ebf81a4c510fbcac0d126e59252dd42aa54a",
+        id: "001",
+        password: "123",
+      },
 
       // detailForm 前端数据
       detailForm: {
@@ -139,7 +204,6 @@ export default {
           comment: "回复慢",
         }
       ],
-
     };
   },
   mounted() {
@@ -168,17 +232,10 @@ export default {
       // doctorName是用户想要看的医生姓名
       // 从route获取params之后，需要通过axios获取
       this.doctorName = this.$route.params.doctorName
-
-
       // ---- a test -----
       this.detailForm.name = this.doctorName
 
-    
-
-      console.log("---a------------------")
-      
-      //////// TEST VERSION ///////
-      // 1. 获取医生基本信息
+      console.log("---axios begin------------------")
       axios({
         method: 'post',
         url: 'http://localhost:8088/getDoctorInfo',
@@ -191,10 +248,15 @@ export default {
           console.log("结果为空！")
           alert("抱歉，该医生不存在!")
         } else {
-          this.dbFrom = res.data
+          // 若结果不为空
+          // dbForm赋值为获取的结果
+          // 更新图片地址
+          this.dbFrom = res.data[0]
+          picUrl = this.dbFrom.graph
+          this.dbFrom.score /= 20
         }
       })
-      console.log("---b------------------")
+      console.log("---axios end------------------")
     }
   }
 };
