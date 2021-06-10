@@ -1,5 +1,6 @@
 <template>
   <div id="hospitalization">
+<!--
     <div class="nav">
       <span @click="check" :class="['tab', flag == 'check' ? 'check_tab' : '']">
         医生查找</span
@@ -11,6 +12,7 @@
         >挂号-测试</span
       >
     </div>
+-->
     <router-view class="content"> </router-view>
     <!-- 定义报告查询入口组件，里面分为查询页面和添加页面，点击相应按钮执行路由的跳转 -->
   </div>

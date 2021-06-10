@@ -29,6 +29,16 @@
                           placeholder="请输入医院"></el-input>
             </el-form-item>
 
+            <el-form-item>
+                <el-input v-model="formInline.medicine"
+                          placeholder="请输入疾病"></el-input>
+            </el-form-item>
+
+            <el-form-item>
+                <el-input v-model="formInline.location"
+                          placeholder="请输入所在城市"></el-input>
+            </el-form-item>
+
 
             <el-form-item>
                 <el-button icon="el-icon-search" circle></el-button>
@@ -69,12 +79,23 @@
                 </template>
             </el-table-column>
 
+            <el-table-column label="城市">
+                <template slot-scope="scope">
+                    {{ scope.row.hospitalinfo.location }}
+                </template>
+            </el-table-column>
 
             <el-table-column prop="age" label="年龄">
                 <template slot-scope="scope">
                     <span>
                         {{ new Date().getFullYear() - scope.row.birthday.split("-")[0]}}
                     </span>
+                </template>
+            </el-table-column>
+            
+            <el-table-column label="擅长方向">
+                <template slot-scope="scope">
+                    <span>{{ scope.row.medicine }}</span>
                 </template>
             </el-table-column>
 
@@ -126,7 +147,7 @@
                        @size-change="handleSizeChange"
                        @current-change="handleCurrentChange"
                        :current-page.sync="currentPage"
-                       :page-size="10"
+                       :page-size="1"
                        layout="prev, pager, next, jumper"
                        :total="1">
         </el-pagination>
@@ -141,6 +162,8 @@
         departmentname: "",
         hospitalname: "",
         date: "",
+        medicine: "",
+        location: "",
       },
       //定义查询的表单元素
 
@@ -214,15 +237,17 @@
           total: 5,
           state: 2,
           date: "2021-05-24 00:00:00",
+          medicine: "代谢性疾病 糖尿病 肥胖 营养 体重管理",
           departmentinfo:{
             id: 34,
-            departmentname: "眼科",
+            departmentname: "特需营养咨询专家",
             comment: null,
           },
           hospitalinfo:{
             id: 35,
-            hospitalname: "杭州第一医院",
+            hospitalname: "浙江大学医学院附属妇产科医院",
             comment: null,
+            location: "杭州",
           },
         },
         {
@@ -235,15 +260,17 @@
           total: 5,
           state: 2,
           date: "2021-05-24 00:00:00",
+          medicine: "产妇健康检查 产前诊断",
           departmentinfo:{
             id: 34,
-            departmentname: "耳鼻喉科",
+            departmentname: "产科专家",
             comment: null,
           },
           hospitalinfo:{
             id: 35,
-            hospitalname: "浙大附属二院",
+            hospitalname: "浙江大学医学院附属妇产科医院",
             comment: null,
+            location: "杭州",
           },
         },
         {
@@ -256,6 +283,7 @@
           total: 5,
           state: 2,
           date: "2021-05-24 00:00:00",
+          medicine: "抑郁症的早期干预",
           departmentinfo:{
             id: 34,
             departmentname: "心理卫生科",
@@ -263,11 +291,11 @@
           },
           hospitalinfo:{
             id: 35,
-            hospitalname: "浙大附属一院",
+            hospitalname: "北京第一医院",
             comment: null,
+            location: "北京",
           },
         },
-
       ];
 
       // this.$http("/medicalrecord/list", "post", {
@@ -290,6 +318,8 @@
           item.doctorname.includes(this.formInline.doctorname) &&
           item.departmentinfo.departmentname.includes(this.formInline.departmentname) &&
           item.hospitalinfo.hospitalname.includes(this.formInline.hospitalname) &&
+          item.medicine.includes(this.formInline.medicine) &&
+          item.hospitalinfo.location.includes(this.formInline.location) &&
           //result
           //item.star.includes(this.formInline.star) &&
           item.date.includes(
